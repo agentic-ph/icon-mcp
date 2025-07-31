@@ -1,0 +1,136 @@
+# Docker Compose for Icon MCP Server
+version: '3.8'
+
+services:
+  # Development service
+  icon-mcp-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    container_name: icon-mcp-dev
+    ports:
+      - '3000:3000'
+      - '9229:9229' # Debug port
+    environment:
+      - NODE_ENV=development
+      - LOG_LEVEL=debug
+      - PORT=3000
+      - CACHE_TTL=300
+      - MAX_SEARCH_RESULTS=100
+    volumes:
+      - ./src:/app/src:ro
+      - ./scripts:/app/scripts:ro
+      - ./icon-libraries:/app/icon-libraries:ro
+      - ./data:/app/data
+      - ./logs:/app/logs
+    command: ['npm', 'run', 'dev']
+    restart: unless-stopped
+    networks:
+      - icon-network
+    profiles:
+      - dev
+
+  # Production service
+  icon-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: icon-mcp-prod
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=production
+      - LOG_LEVEL=info
+      - PORT=3000
+      - CACHE_TTL=3600
+      - MAX_SEARCH_RESULTS=50
+      - RATE_LIMIT_WINDOW=900000 # 15 minutes
+      - RATE_LIMIT_MAX=1000
+    volumes:
+      - ./icon-libraries:/app/icon-libraries:ro
+      - icon-data:/app/data
+      - icon-logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - icon-network
+    profiles:
+      - prod
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Redis cache for production (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: icon-redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    networks:
+      - icon-network
+    profiles:
+      - prod
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+
+  # Monitoring with Prometheus (optional)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: icon-prometheus
+    ports:
+      - '9090:9090'
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - icon-network
+    profiles:
+      - monitoring
+
+  # Grafana for visualization (optional)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: icon-grafana
+    ports:
+      - '3001:3000'
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    restart: unless-stopped
+    networks:
+      - icon-network
+    profiles:
+      - monitoring
+
+networks:
+  icon-network:
+    driver: bridge
+
+volumes:
+  icon-data:
+    driver: local
+  icon-logs:
+    driver: local
+  redis-data:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local

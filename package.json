@@ -1,0 +1,141 @@
+{
+  "name": "icon-mcp",
+  "version": "1.0.1",
+  "description": "A unified icons MCP server - provides search capabilities across multiple icon libraries with fuzzy search, npm package integration, and comprehensive icon discovery",
+  "keywords": [
+    "mcp",
+    "modelcontextprotocol",
+    "server",
+    "icons",
+    "search",
+    "fuzzy-search",
+    "fuse.js",
+    "octicons",
+    "feather",
+    "bootstrap-icons",
+    "tabler-icons",
+    "design",
+    "ui",
+    "svg",
+    "typescript"
+  ],
+  "homepage": "https://github.com/decano/icon-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/decano/icon-mcp/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/decano/icon-mcp.git"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "decano",
+    "email": "decano@example.com",
+    "url": "https://github.com/decano"
+  },
+  "contributors": [],
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "icon-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "package.json"
+  ],
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "build:clean": "rm -rf dist && npm run build",
+    "build-icons": "node -e \"import('./scripts/build-index.js').then(m => m.buildIndex()).catch(console.error)\"",
+    "postinstall": "npm run build-icons",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "dev:watch": "tsx watch src/index.ts",
+    "prepublishOnly": "npm run build-icons && npm run build",
+    "inspect": "npx @modelcontextprotocol/inspector node dist/index.js",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest --coverage",
+    "test:ui": "vitest --ui",
+    "test:integration": "vitest run tests/integration",
+    "test:unit": "vitest run tests/unit",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "format": "prettier --write \"src/**/*.{ts,js,json,md}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,js,json,md}\"",
+    "type-check": "tsc --noEmit",
+    "ci:check": "npm run type-check && npm run lint && npm run format:check && npm run test:coverage",
+    "build-index": "node scripts/build-index.js",
+    "update-icons": "npm run build-index",
+    "docker:build": "docker build -t icon-mcp:latest .",
+    "docker:build:dev": "docker-compose --profile dev build",
+    "docker:build:prod": "docker-compose --profile prod build",
+    "docker:run": "docker-compose --profile prod up -d",
+    "docker:run:dev": "docker-compose --profile dev up",
+    "docker:stop": "docker-compose down",
+    "docker:push": "docker push icon-mcp:latest",
+    "release": "npm version patch && npm publish",
+    "release:minor": "npm version minor && npm publish",
+    "release:major": "npm version major && npm publish",
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
+    "security:audit": "npm audit --audit-level moderate",
+    "security:fix": "npm audit fix"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.0",
+    "axios": "^1.11.0",
+    "fuse.js": "^7.0.0",
+    "zod": "^3.25.76",
+    "@primer/octicons": "^19.8.0",
+    "@tabler/icons": "^2.47.0",
+    "bootstrap-icons": "^1.11.3",
+    "feather-icons": "^4.29.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "@typescript-eslint/eslint-plugin": "^8.38.0",
+    "@typescript-eslint/parser": "^8.38.0",
+    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/ui": "^3.2.4",
+    "conventional-changelog-cli": "^5.0.0",
+    "eslint": "^9.32.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-prettier": "^5.5.3",
+    "prettier": "^3.6.2",
+    "tsx": "^4.7.1",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4",
+    "vitest-mock-extended": "^3.1.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/decano"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
+}
