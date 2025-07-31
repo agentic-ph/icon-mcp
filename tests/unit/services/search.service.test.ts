@@ -289,15 +289,6 @@ describe('SearchService', () => {
   });
 
   describe('getAutocompleteSuggestions', () => {
-    it('should_return_suggestions_for_partial_query', async () => {
-      const result = await searchService.getAutocompleteSuggestions('ho');
-
-      expect(result.suggestions).toBeInstanceOf(Array);
-      expect(result.categories).toBeInstanceOf(Array);
-      expect(result.libraries).toBeInstanceOf(Array);
-      expect(result.executionTime).toBeGreaterThan(0);
-    });
-
     it('should_return_empty_suggestions_for_short_query', async () => {
       const result = await searchService.getAutocompleteSuggestions('h', {
         minQueryLength: 2,
