@@ -1,6 +1,6 @@
 {
   "name": "icon-mcp",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A unified icons MCP server - provides search capabilities across multiple icon libraries with fuzzy search, npm package integration, and comprehensive icon discovery",
   "keywords": [
     "mcp",
