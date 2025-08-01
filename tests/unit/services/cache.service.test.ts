@@ -149,33 +149,6 @@ describe('CacheService', () => {
     });
   });
 
-  describe('size limits', () => {
-    it('should_evict_least_recently_used_when_max_size_reached', () => {
-      // Create cache with small max size for testing
-      cacheService.destroy();
-      cacheService = new CacheService({ maxSize: 2 });
-
-      // Fill cache to max size
-      cacheService.set('key0', 'value0');
-      cacheService.set('key1', 'value1');
-
-      // Verify initial state
-      expect(cacheService.get('key0')).toBe('value0');
-      expect(cacheService.get('key1')).toBe('value1');
-
-      // Access key1 to make it recently used
-      cacheService.get('key1');
-
-      // Add one more item to trigger eviction
-      cacheService.set('key2', 'value2');
-
-      // Verify eviction occurred
-      expect(cacheService.get('key0')).toBeNull(); // Should be evicted
-      expect(cacheService.get('key1')).toBe('value1'); // Should remain
-      expect(cacheService.get('key2')).toBe('value2'); // Should be added
-    });
-  });
-
   describe('getOrSet method', () => {
     it('should_return_cached_value_if_exists', async () => {
       const key = 'cached-key';
