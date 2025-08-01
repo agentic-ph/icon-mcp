@@ -109,15 +109,20 @@ describe('SearchService', () => {
     it('should_handle_provider_errors_gracefully', async () => {
       // Mock provider to throw error
       const errorProvider = new MockIconProvider('error-provider');
-      vi.spyOn(errorProvider, 'searchIcons').mockRejectedValue(new Error('Provider error'));
+      const searchSpy = vi
+        .spyOn(errorProvider, 'searchIcons')
+        .mockRejectedValue(new Error('Provider error'));
 
       const errorRegistry = new MockProviderRegistry([errorProvider]);
       const errorSearchService = new SearchService(mockCacheService, errorRegistry);
 
-      const result = await errorSearchService.searchIcons('home');
-
-      expect(result.searchType).toBe('failed');
-      expect(result.error).toBeDefined();
+      try {
+        const result = await errorSearchService.searchIcons('home');
+        expect(result.searchType).toBe('failed');
+        expect(result.error).toBeDefined();
+      } finally {
+        searchSpy.mockRestore();
+      }
     });
   });
 
@@ -235,9 +240,14 @@ describe('SearchService', () => {
     });
 
     it('should_throw_error_for_non_existent_icon', async () => {
-      await expect(searchService.searchSimilar('non-existent', 'octicons')).rejects.toThrow(
-        IconSearchError
-      );
+      try {
+        await expect(searchService.searchSimilar('non-existent', 'octicons')).rejects.toThrow(
+          IconSearchError
+        );
+      } catch (error) {
+        // Expected error, handle gracefully
+        expect(error).toBeInstanceOf(IconSearchError);
+      }
     });
 
     it('should_respect_limit_parameter', async () => {
@@ -276,15 +286,20 @@ describe('SearchService', () => {
 
     it('should_handle_provider_errors_gracefully', async () => {
       const errorProvider = new MockIconProvider('error-provider');
-      vi.spyOn(errorProvider, 'searchByCategory').mockRejectedValue(new Error('Provider error'));
+      const categorySpy = vi
+        .spyOn(errorProvider, 'searchByCategory')
+        .mockRejectedValue(new Error('Provider error'));
 
       const errorRegistry = new MockProviderRegistry([errorProvider]);
       const errorSearchService = new SearchService(mockCacheService, errorRegistry);
 
-      const result = await errorSearchService.searchByCategory('navigation');
-
-      expect(result.searchType).toBe('failed');
-      expect(result.error).toBeDefined();
+      try {
+        const result = await errorSearchService.searchByCategory('navigation');
+        expect(result.searchType).toBe('failed');
+        expect(result.error).toBeDefined();
+      } finally {
+        categorySpy.mockRestore();
+      }
     });
   });
 
@@ -335,15 +350,18 @@ describe('SearchService', () => {
 
     it('should_handle_errors_gracefully', async () => {
       // Mock provider to throw error
-      vi.spyOn(mockProviderRegistry, 'getAvailableProviders').mockRejectedValue(
-        new Error('Registry error')
-      );
+      const registrySpy = vi
+        .spyOn(mockProviderRegistry, 'getAvailableProviders')
+        .mockRejectedValue(new Error('Registry error'));
 
-      const result = await searchService.getAutocompleteSuggestions('ho');
-
-      expect(result.suggestions).toEqual([]);
-      expect(result.categories).toEqual([]);
-      expect(result.libraries).toEqual([]);
+      try {
+        const result = await searchService.getAutocompleteSuggestions('ho');
+        expect(result.suggestions).toEqual([]);
+        expect(result.categories).toEqual([]);
+        expect(result.libraries).toEqual([]);
+      } finally {
+        registrySpy.mockRestore();
+      }
     });
   });
 

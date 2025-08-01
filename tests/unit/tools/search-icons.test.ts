@@ -194,29 +194,39 @@ describe('search_icons tool', () => {
     });
 
     it('should_handle_search_service_errors', async () => {
-      vi.spyOn(searchService, 'searchIcons').mockRejectedValue(new Error('Search service error'));
+      const searchSpy = vi
+        .spyOn(searchService, 'searchIcons')
+        .mockRejectedValue(new Error('Search service error'));
 
-      const result = await searchIconsTool({
-        query: 'home',
-      });
+      try {
+        const result = await searchIconsTool({
+          query: 'home',
+        });
 
-      expect(result.content).toHaveLength(1);
-      expect(result.content[0].type).toBe('text');
-      expect(result.content[0].text).toContain('Error: Search service error');
-      expect(result.isError).toBe(true);
+        expect(result.content).toHaveLength(1);
+        expect(result.content[0].type).toBe('text');
+        expect(result.content[0].text).toContain('Error: Search service error');
+        expect(result.isError).toBe(true);
+      } finally {
+        searchSpy.mockRestore();
+      }
     });
 
     it('should_handle_unknown_errors', async () => {
-      vi.spyOn(searchService, 'searchIcons').mockRejectedValue('Unknown error');
+      const searchSpy = vi.spyOn(searchService, 'searchIcons').mockRejectedValue('Unknown error');
 
-      const result = await searchIconsTool({
-        query: 'home',
-      });
+      try {
+        const result = await searchIconsTool({
+          query: 'home',
+        });
 
-      expect(result.content).toHaveLength(1);
-      expect(result.content[0].type).toBe('text');
-      expect(result.content[0].text).toContain('Error: Unknown error occurred');
-      expect(result.isError).toBe(true);
+        expect(result.content).toHaveLength(1);
+        expect(result.content[0].type).toBe('text');
+        expect(result.content[0].text).toContain('Error: Unknown error occurred');
+        expect(result.isError).toBe(true);
+      } finally {
+        searchSpy.mockRestore();
+      }
     });
 
     it('should_handle_empty_search_results', async () => {
